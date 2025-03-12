@@ -4,13 +4,21 @@ document.addEventListener("DOMContentLoaded", function () {
     let speedValue = document.getElementById("speedValue");
     let speedInput = document.getElementById("speedInput");
 
-    chrome.storage.sync.get(["videoSpeed"], function (result) {
-        if (result.videoSpeed) {
-            speedSlider.value = result.videoSpeed;
-            speedInput.value = result.videoSpeed;
-            speedValue.textContent = result.videoSpeed + "x";
-        }
-    });
+    function fetchCurrentSpeed() {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                function: getPlaybackSpeed
+            }, (results) => {
+                if (results && results[0] && results[0].result) {
+                    let currentSpeed = results[0].result;
+                    speedSlider.value = currentSpeed;
+                    speedInput.value = currentSpeed;
+                    speedValue.textContent = currentSpeed + "x";
+                }
+            });
+        });
+    }
 
     function updateSpeed(speed) {
         speed = Math.max(0.1, Math.min(10, Math.round(speed * 10) / 10));
@@ -40,10 +48,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    function getPlaybackSpeed() {
+        let video = document.querySelector("video");
+        return video ? video.playbackRate : 1.0;
+    }
+
     function setPlaybackSpeed(speed) {
         let video = document.querySelector("video");
         if (video) {
             video.playbackRate = parseFloat(speed);
         }
     }
+
+    fetchCurrentSpeed();
 });
