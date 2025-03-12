@@ -5,7 +5,8 @@
     "description": "Adjust playback speed of Panopto videos.",
     "permissions": [
         "activeTab",
-        "scripting"
+        "scripting",
+        "storage"
     ],
     "action": {
         "default_popup": "popup.html",
